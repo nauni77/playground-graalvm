@@ -1,0 +1,168 @@
+buildscript {
+  repositories {
+    maven { url "http://repository.intra.bls19.de:8081/artifactory/maven/" }
+//    maven { url "http://repository.localhost:8081/artifactory/maven/" }
+    maven { url "https://plugins.gradle.org/m2/" }
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "net.researchgate:gradle-release:2.6.0"
+    classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.7.RELEASE"
+    classpath "io.spring.gradle:dependency-management-plugin:1.0.7.RELEASE"
+    classpath "io.franzbecker:gradle-lombok:1.14"
+  }
+}
+
+task createWrapper(type: Wrapper) {
+  gradleVersion = '6.4'
+  distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
+allprojects {
+
+  apply {
+    plugin 'org.springframework.boot'
+    plugin 'io.spring.dependency-management'
+    plugin 'net.researchgate.release'
+
+    plugin 'java'
+    plugin 'groovy'
+
+    plugin 'io.franzbecker.gradle-lombok'
+
+    plugin 'idea'
+    plugin 'maven'
+  }
+
+  repositories {
+    maven { url "http://repository.intra.bls19.de:8081/artifactory/maven/" }
+//    maven { url "http://repository.localhost:8081/artifactory/maven/" }
+//    mavenCentral()
+//    jcenter()
+  }
+
+  sourceCompatibility = 1.8
+
+  release { // configure 'net.researchgate.release'
+    tagTemplate = '$name-$version'
+    buildTasks = ['build']
+    git {
+      requireBranch = 'littleTools_0'
+    }
+  }
+
+//  uploadArchives {
+//    repositories {
+//      mavenDeployer {
+//        repository(url: 'http://repository.intra.bls19.de:8081/artifactory/test-release-local/') {
+//          authentication(userName: 'tester', password: 'test123+')
+//        }
+//        snapshotRepository(url: 'http://repository.intra.bls19.de:8081/artifactory/test-snapshot-local/') {
+//          authentication(userName: 'tester', password: 'test123+')
+//        }
+//      }
+//    }
+//  }
+
+//  uploadArchives {
+//    repositories {
+//      mavenDeployer {
+//        repository(url: 'http://repo.intra.vsa.de:8081/artifactory/test-release-local/') {
+//          authentication(userName: 'tester', password: 'tester123+')
+//        }
+//        snapshotRepository(url: 'http://repo.intra.vsa.de:8081/artifactory/test-release-local/') {
+//          authentication(userName: 'tester', password: 'tester123+')
+//        }
+//      }
+//    }
+//  }
+
+  dependencyManagement {
+    imports {
+      // this depends on the import of "spring-boot-gradle-plugin"
+      mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+
+    dependencies {
+      // example from marvin_4!
+//    dependencySet(group: 'org.slf4j', version: '1.7.25') {
+//      entry 'slf4j-api'
+//      entry 'log4j-over-slf4j'
+//      entry 'slf4j-jdk14'
+//    }
+
+//      dependencySet(group: 'org.apache.logging.log4j', version: '2.11.1') {
+//        entry 'log4j-api'
+//        entry 'log4j-core'
+//      }
+////      dependency 'org.slf4j:slf4j-log4j12:1.7.25'
+//
+//      dependency 'org.apache.commons:commons-lang3:3.8' // used at log4j2 SplunkJsonLayout
+//
+//      dependencySet(group: 'org.springframework.boot', version: "2.1.7.RELEASE") {
+//        entry 'spring-boot-starter'
+//        entry 'spring-boot-starter-web'
+////        entry 'spring-boot-starter-log4j2'
+//      }
+//
+//      dependencySet(group: 'io.github.openfeign', version: '10.3.0') {
+//        entry 'feign-core'
+//        entry 'feign-gson'
+//      }
+//
+//      dependency 'org.springframework.cloud:spring-cloud-starter-openfeign:2.1.2.RELEASE'
+////        entry 'spring-cloud-starter-netflix-ribbon'
+//
+//      // automatically include getter, setter, a.s.o.
+//      dependency 'org.projectlombok:lombok:1.18.0'
+//
+//      dependency 'commons-cli:commons-cli:1.3' // needed by groovy dependency for building JAR!
+//      dependency 'com.sun.mail:javax.mail:1.5.6'
+//      dependency 'junit:junit:4.12'
+//      dependency 'org.junit.jupiter:junit-jupiter:5.5.0'
+//
+//      dependency 'com.google.code.gson:gson:2.8.5'
+    }
+  }
+
+  // TASK : "releaseSnapshot" build snapshot and upload to repository
+  task releaseSnapshot(dependsOn: [assemble, uploadArchives])
+  uploadArchives.mustRunAfter assemble
+
+  // TASK : "release" build release and upload to repository
+  afterReleaseBuild.dependsOn uploadArchives
+}
+
+
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
+dependencies {
+
+  // alles fürs logging
+//  compile 'de.vsa.marvin:logBasics-logback:0.1'
+
+//  compileOnly("org.projectlombok:lombok")
+
+//  testCompile("org.junit.jupiter:junit-jupiter")
+
+//  testCompile('com.google.code.gson:gson')
+}
+
+
+// configure packaging ... for this 'littleTools' project
+// - no bootJar!
+bootJar {
+  enabled = false
+}
+// - do not build JAR
+jar.enabled = false
+// - do not upload JAR
+uploadArchives.enabled = false
+
+//test {
+//  filter {
+//    includeTestsMatching "**.Test*"
+//  }
+//}

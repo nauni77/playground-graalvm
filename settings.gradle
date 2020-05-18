@@ -1,0 +1,3 @@
+rootProject.name = 'playing-graalvm'
+
+include 'graalvm01hello'
